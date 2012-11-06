@@ -22,22 +22,26 @@ db.open(function(err, db) {
     }
 });
 
-var users = {}
+var username;
 
-exports.login = function(req,res){
+/*exports.login = function(req,res){
 		
 	    db.collection('users', function(err, collection) {
         collection.find().toArray(function(err, items) {
        			for(var i=0;i<items.length;i++){
-       				console.log(items[i].username);
+       				users={
+       					username : items[i].username,
+       					password : items[i].password
+       				}
        			}
+       			console.log(items)
            	 	res.send(items)
         
         });
     });
-}
+}*/
 
-users = {
+/*users = {
   account: function(){
   	 db.collection('users', function(err, collection) {
 		  	 	
@@ -56,12 +60,15 @@ hash('foobar', function(err, salt, hash){
   users.account.hash = hash;
   
   console.log(users.account)
-});
+});*/
 
 exports.addUser = function(req,res){
 	var pageParam = req.body;
-	console.log(req.body+" ************ "+JSON.stringify(pageParam))
+    /*username = req.body.username;*/
+	
+	function insertInto(pageParam){
     db.collection('users', function(err, collection) {
+		console.log(pageParam,"222222")
         collection.insert(pageParam, {safe:true}, function(err, result) {
             if (err) {
                 res.send({'error':'An error has occurred'});
@@ -70,7 +77,17 @@ exports.addUser = function(req,res){
                 res.send(result[0]);
             }
         });
-    });
+    });		
+	}
+	
+	hash(req.body.password, function(err, salt, hash){
+		  pageParam.salt = salt;
+		  pageParam.hash = hash;
+		  insertInto(pageParam);
+	})
+
+
+	
 }
 
 exports.restrict = function (req, res, next) {
@@ -84,20 +101,33 @@ exports.restrict = function (req, res, next) {
 
 exports.authenticate = function(accounts, pass, fn) {
 	
-	console.log('authenticating %s:%s',accounts, pass)
+  console.log('authenticating %s:%s',accounts, pass)
   if (!module.parent) console.log('authenticating %s:%s',accounts, pass);
-  var user = users.account;
+    
+    var user = accounts;
+    
+    var userMatched;
+    console.log('Retrieving user: ' + user);
+    db.collection('users', function(err, collection) {
+        collection.findOne({'username':user}, function(err, item) {
+            console.log(item, "ggggg")
+            userMatched=item;
+        });
+    });    
+    
+    
+ // var user = users.account;
   // query the db for the given username
-  if (!user) return fn(new Error('cannot find user'));
+  if (!userMatched) return fn(new Error('cannot find user'));
   // apply the same algorithm to the POSTed password, applying
   // the hash against the pass / salt, if there is a match we
   // found the user
-  hash(pass, user.salt, function(err, hash){
+  hash(pass, userMatched.salt, function(err, hash){
     
     if (err) return fn(err);
-    if (hash == user.hash) return fn(null, user);
+    if (hash == userMatched.hash) return fn(null, user);
     fn(new Error('invalid password'));
-  })
+  }) 
 }
 
 

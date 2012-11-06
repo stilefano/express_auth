@@ -28,7 +28,7 @@ app.use(function(req, res, next){
   next();
 });
 
-app.get("/",auth.login, function(req,res){
+app.get("/", function(req,res){
 	res.render('home')
 })
 
