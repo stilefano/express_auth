@@ -57,8 +57,7 @@ app.post('/signup', auth.addUser,function(){res.redirect('signup')});
 
 
 app.post('/login', function(req, res){
-  auth.retrieveUser(req.body.username);
-  auth.authenticate(req.body.username, req.body.password,req,res, function(err, user){
+  auth.authenticate(req.body.username, req.body.password, function(err, user){
     if (user) {
       // Regenerate session when signing in
       // to prevent fixation 
