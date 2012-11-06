@@ -1,0 +1,26 @@
+<% var title = 'Sign up' %>
+<% include head %>
+<% include nav %>
+
+
+<h1>Sign up</h1>
+<%- message %>
+
+<form method="post" action="/signup">
+  <p>
+  	<label>Email address</label>
+  	<input type="text" name="email" />
+  </p>
+  
+  <p>
+    <label>Username:</label>
+    <input type="text" name="username">
+  </p>
+  <p>
+    <label>Password:</label>
+    <input type="text" name="password">
+  </p>
+  <p>
+    <input type="submit" value="Register now">
+  </p>
+</form>
