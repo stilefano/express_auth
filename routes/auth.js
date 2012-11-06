@@ -102,32 +102,35 @@ exports.restrict = function (req, res, next) {
 exports.authenticate = function(accounts, pass, fn) {
 	
   console.log('authenticating %s:%s',accounts, pass)
-  if (!module.parent) console.log('authenticating %s:%s',accounts, pass);
+  if (!module.parent) console.log('authenticating %s:%s',accounts, pass);   
+  var user = accounts;
+  var userMatched;
+  db.collection('users', function(err, collection) {
+      collection.findOne({'username':user}, function(err, item) {
+          console.log(item, "ggggg")
+          userMatched=item;
+          console.log(" /n ",userMatched.hash, err)
+		 // var user = users.account;
+		
+		  // query the db for the given username
+		  if (!userMatched) return fn(new Error('cannot find user'));
+		  // apply the same algorithm to the POSTed password, applying
+		  // the hash against the pass / salt, if there is a match we
+		  // found the user
+		  hash(pass, userMatched.salt, function(err, hash){
+		     
+		    if (err) return fn(err);
+		   
+		    if (hash == userMatched.hash) return fn(null, user);
+		    fn(new Error('invalid password'));
+		  }) 
+      });
+  });  
+  
     
-    var user = accounts;
-    
-    var userMatched;
-    console.log('Retrieving user: ' + user);
-    db.collection('users', function(err, collection) {
-        collection.findOne({'username':user}, function(err, item) {
-            console.log(item, "ggggg")
-            userMatched=item;
-        });
-    });    
     
     
- // var user = users.account;
-  // query the db for the given username
-  if (!userMatched) return fn(new Error('cannot find user'));
-  // apply the same algorithm to the POSTed password, applying
-  // the hash against the pass / salt, if there is a match we
-  // found the user
-  hash(pass, userMatched.salt, function(err, hash){
-    
-    if (err) return fn(err);
-    if (hash == userMatched.hash) return fn(null, user);
-    fn(new Error('invalid password'));
-  }) 
+
 }
 
 
