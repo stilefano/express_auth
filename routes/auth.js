@@ -22,14 +22,31 @@ db.open(function(err, db) {
     }
 });
 
-var users = {
-  // username: function(){
-  	 // db.collection('users', function(err, collection) {
-// 		  	 	
-  	 // });
-  // }	account: {
+var users = {}
+
+exports.login = function(req,res){
+		
+	    db.collection('users', function(err, collection) {
+        collection.find().toArray(function(err, items) {
+       			for(var i=0;i<items.length;i++){
+       				console.log(items[i].username);
+       			}
+           	 	res.send(items)
+        
+        });
+    });
+}
+
+users = {
+  account: function(){
+  	 db.collection('users', function(err, collection) {
+		  	 	
+  	 });
+  },
+
+  account: {
 		name: "prova"
-		}
+  }
 };
 
 hash('foobar', function(err, salt, hash){
