@@ -26,7 +26,7 @@ app.use(function(req, res, next){
   res.locals.message = '';
   if (err) res.locals.message = '<p class="msg error">' + err + '</p>';
   if (msg) res.locals.message = '<p class="msg success">' + msg + '</p>';
-  res.locals.prova = "ma vaffanculo vai" + res.locals
+  res.locals.prova = "..."
   next();
 });
 
@@ -52,7 +52,6 @@ app.get('/logout', function(req, res){
 app.get('/restricted?:username',function(req, res,next){
   var pathname = url.parse(req.url).query;
   auth.restrict(req,res,pathname,next);
-  res.send('Wahoo! restricted area, click to <a href="/logout">logout</a>');
 });
 
 app.post('/signup', function(req,res){

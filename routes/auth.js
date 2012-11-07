@@ -46,7 +46,9 @@ exports.addUser = function(req,res,fn){
 exports.restrict = function (req, res,username, next) {
 	console.log(req.session.user.username,' ***** ', username)
   if (req.session.user && req.session.user.username == username) {
-    next();
+    res.render('restricted',{
+    	message: "Welcome "+username
+    })
   } else {
     req.session.error = 'Access denied!';
     res.redirect('/');
