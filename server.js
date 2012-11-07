@@ -25,6 +25,7 @@ app.use(function(req, res, next){
   res.locals.message = '';
   if (err) res.locals.message = '<p class="msg error">' + err + '</p>';
   if (msg) res.locals.message = '<p class="msg success">' + msg + '</p>';
+  res.locals.prova = "ma vaffanculo vai" + res.locals
   next();
 });
 
@@ -49,11 +50,45 @@ app.get('/logout', function(req, res){
   });
 });
 
-app.get('/restricted', auth.restrict, function(req, res){
+app.get('/restricted/:username', auth.restrict, function(req, res){
   res.send('Wahoo! restricted area, click to <a href="/logout">logout</a>');
 });
 
-app.post('/signup', auth.addUser,function(){res.redirect('signup')});
+app.post('/signup', function(req,res){
+	auth.addUser(req,res,function(err){
+			if(err){
+				console.log(err)
+					if(err.match('email')){
+						req.session.error = "Error: You can not associate more than one user with the same email"
+					}else if(err.match('username')){
+						req.session.error = "Error: This username already exists"
+					}else{
+						req.session.error = "Error: try again"
+					}
+				res.redirect('/signup')
+			}else{
+			  auth.authenticate(req.body.username, req.body.password, function(err, user){
+			    if (user) {
+			      // Regenerate session when signing in
+			      // to prevent fixation 
+			      req.session.regenerate(function(){
+			        // Store the user's primary key 
+			        // in the session store to be retrieved,
+			        // or in this case the entire user object
+			        req.session.user = user;
+			        req.session.success = 'Authenticated as ' + user.username
+			          + ' click to <a href="/logout">logout</a>. '
+			          + ' You may now access <a href="/restricted/'+user.username+'">/restricted</a>.';
+			        res.redirect('/');
+			      });
+			    } else {
+			      req.session.error = 'Authentication failed, please check your user name <br/>'+'<strong>'+err+'</strong>';
+			      res.redirect('login');
+			    }
+			  });
+			}
+		})
+	});
 
 
 app.post('/login', function(req, res){
@@ -66,13 +101,13 @@ app.post('/login', function(req, res){
         // in the session store to be retrieved,
         // or in this case the entire user object
         req.session.user = user;
-        req.session.success = 'Authenticated as ' + user.name
+        req.session.success = 'Authenticated as ' + user.username
           + ' click to <a href="/logout">logout</a>. '
-          + ' You may now access <a href="/restricted">/restricted</a>.';
+          + ' You may now access <a href="/restricted/'+user.username+'">/restricted</a>.';
         res.redirect('back');
       });
     } else {
-      req.session.error = 'Authentication failed, please check your user name ';
+      req.session.error = 'Authentication failed, please check your user name <br/>'+'<strong>'+err+'</strong>';
       res.redirect('login');
     }
   });

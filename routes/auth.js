@@ -16,65 +16,25 @@ db.open(function(err, db) {
         db.collection('users', {safe:true}, function(err, collection) {
             if (err) {
                 console.log("The 'auth' collection doesn't exist. Creating it with sample data...");
-                populateDB();
             }
         });
+       
     }
 });
 
-var username;
 
-/*exports.login = function(req,res){
-		
-	    db.collection('users', function(err, collection) {
-        collection.find().toArray(function(err, items) {
-       			for(var i=0;i<items.length;i++){
-       				users={
-       					username : items[i].username,
-       					password : items[i].password
-       				}
-       			}
-       			console.log(items)
-           	 	res.send(items)
-        
-        });
-    });
-}*/
 
-/*users = {
-  account: function(){
-  	 db.collection('users', function(err, collection) {
-		  	 	
-  	 });
-  },
-
-  account: {
-		name: "prova"
-  }
-};
-
-hash('foobar', function(err, salt, hash){
-  if (err) throw err;
-  // store the salt & hash in the "db"
-  users.account.salt = salt;
-  users.account.hash = hash;
-  
-  console.log(users.account)
-});*/
-
-exports.addUser = function(req,res){
+exports.addUser = function(req,res,fn){
 	var pageParam = req.body;
     /*username = req.body.username;*/
 	
 	function insertInto(pageParam){
+	
     db.collection('users', function(err, collection) {
-		console.log(pageParam,"222222")
         collection.insert(pageParam, {safe:true}, function(err, result) {
-            if (err) {
-                res.send({'error':'An error has occurred'});
+            if (err) {				return fn(err.err)
             } else {
-                console.log('Success: ' + JSON.stringify(result[0]));
-                res.send(result[0]);
+				return fn(null)
             }
         });
     });		
@@ -107,9 +67,9 @@ exports.authenticate = function(accounts, pass, fn) {
   var userMatched;
   db.collection('users', function(err, collection) {
       collection.findOne({'username':user}, function(err, item) {
-          console.log(item, "ggggg")
+        
           userMatched=item;
-          console.log(" /n ",userMatched.hash, err)
+         
 		 // var user = users.account;
 		
 		  // query the db for the given username
@@ -121,31 +81,9 @@ exports.authenticate = function(accounts, pass, fn) {
 		     
 		    if (err) return fn(err);
 		   
-		    if (hash == userMatched.hash) return fn(null, user);
-		    fn(new Error('invalid password'));
+		    if (hash == userMatched.hash) return fn(null, userMatched);
+		    	fn(new Error('invalid password'));
 		  }) 
       });
   });  
-  
-    
-    
-    
-
 }
-
-
-
-
-
-/*var populateDB = function(){
-	
-	var users = {
-		username: "prova",
-		password: "test",
-		score: 0	
-	}
-	
-	db.collection('users', function(err, collection) {
-        collection.insert(users, {safe:true}, function(err, result) {});
-    });
-}*/
