@@ -21,8 +21,6 @@ db.open(function(err, db) {
     }
 });
 
-
-
 exports.addUser = function(req,res,fn){
 	
 	var pageParam = req.body;
