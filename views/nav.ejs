@@ -1,8 +1,16 @@
 <nav>
     <a href="/">home</a>
+
+	<% if(!isConnected){ %>
+		<a href="/login">login</a>
+		<a href="/signup">Sign up</a>
+	<% }else{ %>
+		<a href="/logout">logout</a>
+	<% } %>    
     
-    <a href="/login">login</a>
-    <a href="/signup">Sign up</a>
+   
     
 	<%- prova %>	
+	
+
 </nav>
