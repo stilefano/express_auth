@@ -1,6 +1,7 @@
 var express = require('express'),
 	path = require('path'),
 	http = require('http'),
+	url = require('url'),
 	auth = require('./routes/auth');
 
 var app = express();
@@ -43,14 +44,14 @@ app.get('/signup', function(req,res){
 })
 
 app.get('/logout', function(req, res){
-  // destroy the user's session to log them out
-  // will be re-created next request
   req.session.destroy(function(){
     res.redirect('/');
   });
 });
 
-app.get('/restricted/:username', auth.restrict, function(req, res){
+app.get('/restricted?:username',function(req, res,next){
+  var pathname = url.parse(req.url).query;
+  auth.restrict(req,res,pathname,next);
   res.send('Wahoo! restricted area, click to <a href="/logout">logout</a>');
 });
 
@@ -78,7 +79,7 @@ app.post('/signup', function(req,res){
 			        req.session.user = user;
 			        req.session.success = 'Authenticated as ' + user.username
 			          + ' click to <a href="/logout">logout</a>. '
-			          + ' You may now access <a href="/restricted/'+user.username+'">/restricted</a>.';
+			          + ' You may now access <a href="/restricted?'+user.username+'">restricted</a>.';
 			        res.redirect('/');
 			      });
 			    } else {
@@ -103,7 +104,7 @@ app.post('/login', function(req, res){
         req.session.user = user;
         req.session.success = 'Authenticated as ' + user.username
           + ' click to <a href="/logout">logout</a>. '
-          + ' You may now access <a href="/restricted/'+user.username+'">/restricted</a>.';
+          + ' You may now access <a href="/restricted?'+user.username+'">restricted</a>.';
         res.redirect('back');
       });
     } else {

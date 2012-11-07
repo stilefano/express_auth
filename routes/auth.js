@@ -17,27 +17,25 @@ db.open(function(err, db) {
             if (err) {
                 console.log("The 'auth' collection doesn't exist. Creating it with sample data...");
             }
-        });
-       
+        });     
     }
 });
 
 
 
 exports.addUser = function(req,res,fn){
+	
 	var pageParam = req.body;
-    /*username = req.body.username;*/
-	
-	function insertInto(pageParam){
-	
-    db.collection('users', function(err, collection) {
-        collection.insert(pageParam, {safe:true}, function(err, result) {
-            if (err) {				return fn(err.err)
-            } else {
-				return fn(null)
-            }
-        });
-    });		
+
+	function insertInto(pageParam){	
+	    db.collection('users', function(err, collection) {
+	        collection.insert(pageParam, {safe:true}, function(err, result) {
+	            if (err) {					return fn(err.err)
+	            } else {
+					return fn(null)
+	            }
+	        });
+	    });		
 	}
 	
 	hash(req.body.password, function(err, salt, hash){
@@ -45,42 +43,29 @@ exports.addUser = function(req,res,fn){
 		  pageParam.hash = hash;
 		  insertInto(pageParam);
 	})
-
-
-	
 }
 
-exports.restrict = function (req, res, next) {
-  if (req.session.user) {
+exports.restrict = function (req, res,username, next) {
+	console.log(req.session.user.username,' ***** ', username)
+  if (req.session.user && req.session.user.username == username) {
     next();
   } else {
     req.session.error = 'Access denied!';
-    res.redirect('/login');
+    res.redirect('/');
   }
 }
 
 exports.authenticate = function(accounts, pass, fn) {
-	
   console.log('authenticating %s:%s',accounts, pass)
   if (!module.parent) console.log('authenticating %s:%s',accounts, pass);   
   var user = accounts;
   var userMatched;
   db.collection('users', function(err, collection) {
-      collection.findOne({'username':user}, function(err, item) {
-        
+      collection.findOne({'username':user}, function(err, item) {  
           userMatched=item;
-         
-		 // var user = users.account;
-		
-		  // query the db for the given username
 		  if (!userMatched) return fn(new Error('cannot find user'));
-		  // apply the same algorithm to the POSTed password, applying
-		  // the hash against the pass / salt, if there is a match we
-		  // found the user
-		  hash(pass, userMatched.salt, function(err, hash){
-		     
+		  hash(pass, userMatched.salt, function(err, hash){		     
 		    if (err) return fn(err);
-		   
 		    if (hash == userMatched.hash) return fn(null, userMatched);
 		    	fn(new Error('invalid password'));
 		  }) 
