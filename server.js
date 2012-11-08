@@ -17,20 +17,22 @@ app.use(function(req, res, next) {
 	delete req.session.error;
 	delete req.session.success;
 	res.locals.message = '';
+	res.locals.username = '';
 	res.locals.isConnected = false;
 	if (req.session.user)
 		res.locals.isConnected = true;
+		if(res.locals.isConnected){
+			res.locals.username = req.session.user.username;
+		}
 	if (err)
 		res.locals.message = '<p class="msg error">' + err + '</p>';
 	if (msg)
 		res.locals.message = '<p class="msg success">' + msg + '</p>';
-	res.locals.prova = "..."
 	next();
 });
 
 app.get("/", function(req, res) {
 	res.render('home')
-	console.log("this is the session", req.session, "***************", req.session.user)
 })
 
 app.get("/login", function(req, res) {
@@ -94,6 +96,14 @@ app.post('/login', function(req, res) {
 			res.redirect('login');
 		}
 	});
+});
+
+app.get('404',function(req,res){
+	res.render('404.ejs')
+})
+
+app.get('*', function(req, res){
+  res.render('404.ejs');  
 });
 
 http.createServer(app).listen(app.get('port'), function() {

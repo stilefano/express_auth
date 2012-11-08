@@ -55,8 +55,17 @@ exports.restrict = function(req, res, username, next) {
 			isConnected : true
 		})
 	} else {
-		req.session.error = 'Access denied!';
-		res.redirect('/');
+		if(!req.session.user) {
+			req.session.error = 'What are you trying to do Sir?';
+			console.log("undefined")
+			res.redirect('/404')
+		}else{
+			req.session.error = 'Access denied!';
+			console.log("defined")
+			res.redirect('/restricted?'+req.session.user.username)	
+		}
+		
+		//res.redirect('/restricted?'+req.session.user.username);
 	}
 }
 

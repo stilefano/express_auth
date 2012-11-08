@@ -6,11 +6,13 @@
 		<a href="/signup">Sign up</a>
 	<% }else{ %>
 		<a href="/logout">logout</a>
+		<a href="/restricted?<%- username %>"><%- username %></a>
 	<% } %>    
     
    
     
-	<%- prova %>	
-	
+
+	<br/>	
+	<%- message %>
 
 </nav>
