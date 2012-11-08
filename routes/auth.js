@@ -41,11 +41,25 @@ exports.addUser = function(req, res, fn) {
 		});
 	}
 
-	hash(req.body.password, function(err, salt, hash) {
-		pageParam.salt = salt;
-		pageParam.hash = hash;
-		insertInto(pageParam);
-	})
+	if(req.body.password == req.body.passwordConfirmation){
+		hash(req.body.password, function(err, salt, hash) {
+			pageParam.salt = salt;
+			pageParam.hash = hash;
+			insertInto(pageParam);
+		})		
+	}else{
+		// usernameValue = req.body.username;
+		// emailValue = req.body.email;
+// 		
+// 		
+		// res.locals.usernameValue = usernameValue;
+		// //emailValue = res.locals.emailValue;
+// 		
+		// console.log(usernameValue, "****",req.body.username)
+		
+		error = "password confirmation is different from password"
+		fn(error)
+	}
 }
 
 exports.restrict = function(req, res, username, next) {
@@ -55,12 +69,13 @@ exports.restrict = function(req, res, username, next) {
 			isConnected : true
 		})
 	} else {
+		req.session.error = 'Access denied!';
 		if(!req.session.user) {
-			req.session.error = 'What are you trying to do Sir?';
+			//req.session.error = 'What are you trying to do Sir?';
 			console.log("undefined")
 			res.redirect('/404')
 		}else{
-			req.session.error = 'Access denied!';
+			//req.session.error = 'Access denied!';
 			console.log("defined")
 			res.redirect('/restricted?'+req.session.user.username)	
 		}

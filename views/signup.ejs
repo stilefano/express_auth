@@ -1,15 +1,19 @@
 <% var title = 'Sign up' %>
+
 <% include head %>
 <% include nav %>
 
 
 <h1>Sign up</h1>
-<%- message %>
+
 
 <form method="post" action="/signup">
   <p>
   	<label>Email address</label>
-  	<input type="text" name="email" />
+  	<input type="text" name="email" value="
+  		<% if(usernameValue != ''){ %> 
+  			<%- usernameValue %> 
+  		<% } %>" />
   </p>
   
   <p>
@@ -18,7 +22,11 @@
   </p>
   <p>
     <label>Password:</label>
-    <input type="text" name="password">
+    <input type="password" name="password">
+  </p>
+  <p>
+  	<label>Confirm Password</label>
+  	<input type="password" name="passwordConfirmation">
   </p>
   <p>
     <input type="submit" value="Register now">

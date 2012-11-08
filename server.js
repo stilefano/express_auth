@@ -18,6 +18,7 @@ app.use(function(req, res, next) {
 	delete req.session.success;
 	res.locals.message = '';
 	res.locals.username = '';
+	
 	res.locals.isConnected = false;
 	if (req.session.user)
 		res.locals.isConnected = true;
@@ -62,6 +63,8 @@ app.post('/signup', function(req, res) {
 				req.session.error = "Error: You can not associate more than one user with the same email"
 			} else if (err.match('username')) {
 				req.session.error = "Error: This username already exists"
+			} else if(err.match('confirmation')){
+				req.session.error = err;
 			} else {
 				req.session.error = "Error: try again"
 			}
@@ -75,7 +78,7 @@ app.post('/signup', function(req, res) {
 						res.redirect('/');
 					});
 				} else {
-					req.session.error = 'Authentication failed, please check your user name <br/>' + '<strong>' + err + '</strong>';
+					req.session.error = 'Authentication failed <br/>' + '<strong>' + err + '</strong>';
 					res.redirect('login');
 				}
 			});
