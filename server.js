@@ -69,30 +69,17 @@ app.get('/restricted?:username', function(req, res, next) {
 app.post('/signup', function(req, res) {
 	auth.addUser(req, res, function(err,value) {
 		console.log(err," *** ",value)
-		if (err) {			
-			
-			/*if (err.match('email')) {
-				req.session.error = "Error: You can not associate more than one user with the same email"
-			} else if (err.match('username')) {
-				req.session.error = "Error: This username already exists"
-			} else if(err.match('confirmation')){
-				req.session.error = err;
-			} else {
-				req.session.error = "Error: try again"
-			}*/
-			//res.redirect('/');
+		if (err) {
 			if(!value){
 				value = {}
 				value.username = req.body.username;
 				value.email = req.body.email
 			}
 			res.render('signup',{
-				/*usernameValue : (err[1].msg)?err[0].msg:value.username,
-				emailValue : (err[1].msg)?err[0].msg:value.email,*/
 				usernameValue: (err.username !== undefined)?err.username.msg:value.username,
 				emailValue: (err.email !== undefined)?err.email.msg:value.email,
 				passwordIssue: (err.passwordConfirmation !== undefined)?err.passwordConfirmation.msg:"",
-				message : '<p class="msg error">Something went wrong</p>'
+				message : (err=="already exists")?'<p class="msg error">User already exists</p>':'<p class="msg error">Something went wrong</p>'
 			})
 		} else {
 			auth.authenticate(req.body.username, req.body.password, function(err, user) {

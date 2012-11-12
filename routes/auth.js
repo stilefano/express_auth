@@ -29,25 +29,41 @@ exports.addUser = function(req, res, fn) {
 	//req.assert('email', 'valid email required').isEmail();
 	req.assert('username','String is not in range (min 6 characters to 20)').len(6,20);
 	req.assert('password', '6 to 20 characters required').len(6, 20);
-	req.assert('passwordConfirmation').equals(req.body.password);
+	req.assert('passwordConfirmation','Password and Password Confirmation are not equal, please redigit them').equals(req.body.password);
 	
 	var pageParam = req.body;
 	//var errors = req.validationErrors();
 	var mappedErrors = req.validationErrors(true);
-	console.log(mappedErrors)
+	
+	        
+	function checkExistence(){
+		
+	}
+	
 	function insertInto(pageParam) {
+		var alreadyExists = false;
 		db.collection('users', function(err, collection) {
-			collection.insert(pageParam, {
-				safe : true
-			}, function(err, result) {
-				if (err) {
-					return fn(err.err,null)
-				}else if(mappedErrors){
-					return fn(mappedErrors,null)
-				} else {
-					return fn(null,null)	 
-				}
-			});
+			
+			if(mappedErrors){
+				return fn(mappedErrors,null)		
+			}else{
+				collection.find().toArray(function(err, items) {
+					for(var key in items){
+		            	console.log(items[key].username," ",req.body.username);
+		            	if(items[key].username == req.body.username){
+		            		alreadyExists=true;
+		            		return fn("already exists",null);
+		            	}				
+					}
+					if(!alreadyExists){
+						collection.insert(pageParam, {
+								safe : true
+							},function(err,result){
+								console.log("too late")
+								return fn(null,null);}
+					)}
+	        	})				
+			}
 		});
 	}
 	
