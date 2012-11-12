@@ -1,4 +1,9 @@
-var express = require('express'), path = require('path'), http = require('http'), url = require('url'), auth = require('./routes/auth');
+var express = require('express'), 
+	path = require('path'), 
+	http = require('http'), 
+	url = require('url'),
+	expressValidator = require('express-validator'), 
+	auth = require('./routes/auth');
 
 var app = express();
 
@@ -7,7 +12,11 @@ app.configure(function() {
 	app.set('host', process.env.HOST || "127.0.0.1");
 	app.use(express.logger('dev'));
 	/* 'default', 'short', 'tiny', 'dev' */
-	app.use(express.bodyParser()), app.use(express.cookieParser('shhhh, very secret')), app.use(express.session()), app.use(express.static(path.join(__dirname, 'public')));
+	app.use(express.bodyParser()),
+	app.use(expressValidator), 
+	app.use(express.cookieParser('shhhh, very secret')), 
+	app.use(express.session()),
+	app.use(express.static(path.join(__dirname, 'public')));
 	app.set('views', __dirname + '/views');
 	app.set('view engine', 'ejs');
 });
@@ -18,7 +27,9 @@ app.use(function(req, res, next) {
 	delete req.session.success;
 	res.locals.message = '';
 	res.locals.username = '';
-	
+	res.locals.usernameValue = '';
+	res.locals.emailValue = '';
+	res.locals.passwordIssue = '';
 	res.locals.isConnected = false;
 	if (req.session.user)
 		res.locals.isConnected = true;
@@ -42,7 +53,7 @@ app.get("/login", function(req, res) {
 
 app.get('/signup', function(req, res) {
 	res.render('signup.ejs')
-})
+});
 
 app.get('/logout', function(req, res) {
 	req.session.destroy(function() {
@@ -56,10 +67,11 @@ app.get('/restricted?:username', function(req, res, next) {
 });
 
 app.post('/signup', function(req, res) {
-	auth.addUser(req, res, function(err) {
-		if (err) {
-			console.log(err)
-			if (err.match('email')) {
+	auth.addUser(req, res, function(err,value) {
+		console.log(err," *** ",value)
+		if (err) {			
+			
+			/*if (err.match('email')) {
 				req.session.error = "Error: You can not associate more than one user with the same email"
 			} else if (err.match('username')) {
 				req.session.error = "Error: This username already exists"
@@ -67,8 +79,21 @@ app.post('/signup', function(req, res) {
 				req.session.error = err;
 			} else {
 				req.session.error = "Error: try again"
+			}*/
+			//res.redirect('/');
+			if(!value){
+				value = {}
+				value.username = req.body.username;
+				value.email = req.body.email
 			}
-			res.redirect('/signup')
+			res.render('signup',{
+				/*usernameValue : (err[1].msg)?err[0].msg:value.username,
+				emailValue : (err[1].msg)?err[0].msg:value.email,*/
+				usernameValue: (err.username !== undefined)?err.username.msg:value.username,
+				emailValue: (err.email !== undefined)?err.email.msg:value.email,
+				passwordIssue: (err.passwordConfirmation !== undefined)?err.passwordConfirmation.msg:"",
+				message : '<p class="msg error">Something went wrong</p>'
+			})
 		} else {
 			auth.authenticate(req.body.username, req.body.password, function(err, user) {
 				if (user) {
@@ -112,4 +137,5 @@ app.get('*', function(req, res){
 http.createServer(app).listen(app.get('port'), function() {
 	console.log("listin on port " + "http://" + app.get('host') + ":" + app.get('port'));
 })
+
 

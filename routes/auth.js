@@ -25,41 +25,47 @@ db.open(function(err, db) {
 });
 
 exports.addUser = function(req, res, fn) {
-
+	req.assert('email', 'Valid email required').isEmail();
+	//req.assert('email', 'valid email required').isEmail();
+	req.assert('username','String is not in range (min 6 characters to 20)').len(6,20);
+	req.assert('password', '6 to 20 characters required').len(6, 20);
+	req.assert('passwordConfirmation').equals(req.body.password);
+	
 	var pageParam = req.body;
-
+	//var errors = req.validationErrors();
+	var mappedErrors = req.validationErrors(true);
+	console.log(mappedErrors)
 	function insertInto(pageParam) {
 		db.collection('users', function(err, collection) {
 			collection.insert(pageParam, {
 				safe : true
 			}, function(err, result) {
-				if (err) {					return fn(err.err)
+				if (err) {
+					return fn(err.err,null)
+				}else if(mappedErrors){
+					return fn(mappedErrors,null)
 				} else {
-					return fn(null)
+					return fn(null,null)	 
 				}
 			});
 		});
 	}
-
-	if(req.body.password == req.body.passwordConfirmation){
+	
+    
+	//if(req.body.password == req.body.passwordConfirmation){
 		hash(req.body.password, function(err, salt, hash) {
 			pageParam.salt = salt;
 			pageParam.hash = hash;
 			insertInto(pageParam);
 		})		
-	}else{
-		// usernameValue = req.body.username;
-		// emailValue = req.body.email;
-// 		
-// 		
-		// res.locals.usernameValue = usernameValue;
-		// //emailValue = res.locals.emailValue;
-// 		
-		// console.log(usernameValue, "****",req.body.username)
-		
+	/*}else{
 		error = "password confirmation is different from password"
-		fn(error)
-	}
+		var params = {
+			username:req.body.username,
+			email:req.body.email
+		}
+		fn(error,params)
+	}*/
 }
 
 exports.restrict = function(req, res, username, next) {

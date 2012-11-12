@@ -10,17 +10,27 @@
 <form method="post" action="/signup">
   <p>
   	<label>Email address</label>
-  	<input type="text" name="email" value="
-  		<% if(usernameValue != ''){ %> 
-  			<%- usernameValue %> 
-  		<% } %>" />
+  	<% if(emailValue.match('Valid email required')){ %>
+  		<span class="error msg"><%- emailValue %></span>
+  		<input type="text" name="email" value="" />
+  	<% }else{ %>
+  		<input type="text" name="email" value="<%- emailValue %>" />
+  	<% } %>
   </p>
   
   <p>
     <label>Username:</label>
-    <input type="text" name="username">
+    <% if(usernameValue.match('String is not in range')){ %>
+	  	<span class="error msg"><%- usernameValue %></span>
+  		<input type="text" name="username" value="" />
+  	<% }else{ %>
+  		<input type="text" name="username" value="<%- usernameValue %>" />
+  	<% } %>
   </p>
   <p>
+  	<% if(passwordIssue.match('Not')){ %>
+  		<span class="error msg"><%- passwordIssue %></span>
+  	<% } %>
     <label>Password:</label>
     <input type="password" name="password">
   </p>
