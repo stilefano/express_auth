@@ -79,7 +79,7 @@ app.post('/signup', function(req, res) {
 				usernameValue: (err.username !== undefined)?err.username.msg:value.username,
 				emailValue: (err.email !== undefined)?err.email.msg:value.email,
 				passwordIssue: (err.passwordConfirmation !== undefined)?err.passwordConfirmation.msg:"",
-				message : (err=="already exists")?'<p class="msg error">User already exists</p>':'<p class="msg error">Something went wrong</p>'
+				message : (err=="already exists")?'<p class="msg error">User already exists - (email and username must are unique)</p>':'<p class="msg error">Something went wrong</p>'
 			})
 		} else {
 			auth.authenticate(req.body.username, req.body.password, function(err, user) {

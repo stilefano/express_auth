@@ -49,8 +49,7 @@ exports.addUser = function(req, res, fn) {
 			}else{
 				collection.find().toArray(function(err, items) {
 					for(var key in items){
-		            	console.log(items[key].username," ",req.body.username);
-		            	if(items[key].username == req.body.username){
+		            	if(items[key].username == req.body.username || items[key].email == req.body.email){
 		            		alreadyExists=true;
 		            		return fn("already exists",null);
 		            	}				
@@ -59,7 +58,6 @@ exports.addUser = function(req, res, fn) {
 						collection.insert(pageParam, {
 								safe : true
 							},function(err,result){
-								console.log("too late")
 								return fn(null,null);}
 					)}
 	        	})				
